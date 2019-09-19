@@ -8,6 +8,9 @@ var fs = require('fs'),
     Schema = mongoose.Schema, 
     Listing = require('./ListingSchema.js'), 
     config = require('./config');
+var listingData;
+
+mongoose.connect(config.db.uri, {useNewUrlParser: true});
 
 /* Connect to your database using mongoose - remember to keep your key secret*/
 //see https://mongoosejs.com/docs/connections.html
@@ -20,7 +23,27 @@ var fs = require('fs'),
 
   Remember that we needed to read in a file like we did in Bootcamp Assignment #1.
  */
+fs.readFile('listings.json', 'utf8', function(err, data) {
+	if (err) throw err;
+  listingData = JSON.parse(data);
+  writingToDatabase();
+});
 
+
+function writingToDatabase(){
+  for(var key in listingData.entries){
+      new Listing({
+        code: listingData.entries[key].code,
+        name: listingData.entries[key].name,
+        coordinates: listingData.entries[key].coordinates,
+        address: listingData.entries[key].address,
+
+      }).save(function(err){
+          if(err) throw err;
+        });
+  
+  }
+}
 
 /*  
   Check to see if it works: Once you've written + run the script, check out your MongoLab database to ensure that 
